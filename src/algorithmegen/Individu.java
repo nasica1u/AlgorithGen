@@ -39,17 +39,38 @@ public class Individu {
         initFitness();
     }
     
+    private Individu() {}
+    
+    public static final Individu createAlpha(double r, double q, double k, double b0) {
+        Individu individu = new Individu();
+        individu.setR(r);
+        individu.setQ(q);
+        individu.setK(k);
+        individu.setB0(b0);
+        
+        individu.captures = new double[E.length];
+        individu.initCaptures();
+        
+        return individu;
+    }
+    
     public final void initCaptures() {
+        if (b0 > k)
+            b0 = k;
         double biomasse = b0;
         for (int i = 0; i < E.length; i++) {
             captures[i] = q * E[i] * biomasse;
             biomasse = biomasse + r * (1 - biomasse/k) * biomasse - q * E[i] * biomasse;
+            if(biomasse < 0)
+                biomasse = 0;
+            if (biomasse > k)
+                biomasse = k;
         }
     }
     
     public final void initFitness() {
         for (int i = 0; i < E.length; i++) {
-            fitness += Math.pow(E[i] - captures[i], 2);
+            fitness += Math.sqrt(Math.pow(GeneticUtils.individuAlpha.captures[i] - captures[i], 2));
         }
     }
 

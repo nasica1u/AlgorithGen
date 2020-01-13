@@ -28,7 +28,7 @@ public class Generation {
     }
     
     public Generation(List<Individu> individus) {
-        generation = new ArrayList();
+        generation = new ArrayList(individus.size());
         generation.addAll(individus);
     }
     
@@ -72,20 +72,23 @@ public class Generation {
     
     public List<Individu> selection(int nbIndividus) {
         List<Individu> selection = new ArrayList(nbIndividus);
-        List<double[]> plages = new ArrayList(nbIndividus);
+        List<double[]> plages = new ArrayList(size());
         
         // premiere plage
         plages.add(new double[]{0, generation.get(0).getProbabilite()});
-        for (int i = 1; i < generation.size(); i++) {
-            double first = generation.get(i-1).getProbabilite();
-            double second = first + generation.get(i).getProbabilite();
+        for (int i = 0; i < generation.size() - 1; i++) {
+            double first = plages.get(i)[1];
+            double second = first + generation.get(i+1).getProbabilite();
+            //System.out.println(i+" => "+first+":"+second);
             plages.add(new double[]{first, second});
         }
         
-        for (int j = 1; j < nbIndividus; j++) {
-            double proba = j / (nbIndividus + 1); // proba qui doit se trouver dans notre plage
+        for (int j = 0; j < generation.size(); j++) {
+            double proba = j / ((double)nbIndividus + 1); // proba qui doit se trouver dans notre plage
             int indicePlage = 0; // indice de la plage qui correspond a l indice d un individu de la generation
             for (double[] plage : plages) {
+                //if (selection.size() == nbIndividus)
+                //    break;
                 if (proba > plage[0] && proba <= plage[1]) {
                     selection.add(generation.get(indicePlage));
                     break;
@@ -100,7 +103,7 @@ public class Generation {
     public void mutation() {
         List<Individu> toMutate = new ArrayList(size()/2); // indice des individus à muter
         int remaining = size() / 2;
-        while (remaining > 0)
+        while (remaining > 0) // tant qu il reste des mutations
         {
             int random = (int) (Math.random() * size());
             toMutate.add(generation().remove(random));
@@ -127,7 +130,7 @@ public class Generation {
                         while (true)
                         {
                             double newK = GeneticUtils.loiNormale(individu.getK(), sigma(getAllK(toMutate)));
-                            if (newK >= 0.05 && newK <= 0.5) {
+                            if (newK >= 100 && newK <= 2000) {
                                 individu.setK(newK);
                                 break;
                             }
@@ -137,7 +140,7 @@ public class Generation {
                         while (true)
                         {
                             double newQ = GeneticUtils.loiNormale(individu.getQ(), sigma(getAllQ(toMutate)));
-                            if (newQ >= 100 && newQ <= 2000) {
+                            if (newQ >= 0.05 && newQ <= 0.5) {
                                 individu.setQ(newQ);
                                 break;
                             }

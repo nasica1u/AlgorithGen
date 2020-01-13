@@ -17,7 +17,7 @@ public class AlgorithmeGen {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Individu individuAlpha = GeneticUtils.setIndividuAlpha(new Individu(0.278, 0.222, 1055, 800));
+        Individu individuAlpha = GeneticUtils.setIndividuAlpha(Individu.createAlpha(0.278, 0.222, 1055, 800));
         System.out.println("Individu acceptable : ");
         System.out.println(individuAlpha);
         
@@ -26,7 +26,7 @@ public class AlgorithmeGen {
         System.out.println("Premiere Generation de " + N + " individus.");
         Generation generation = new Generation(N);
         
-        int MAX_ITERATIONS = 50;
+        int MAX_ITERATIONS = 1000;
         int PAS_ENREGISTREMENT_PAST_FITNESS = 10;
         double FITNESS_MIN = 0.2;
         double FITNESS_STABLE = 0.05;
@@ -59,9 +59,14 @@ public class AlgorithmeGen {
             generation.determineProbabilite();
             
             // Selection de la nouvelle generation a la place de l ancienne
-            // TODO reorganiser aleatoirement
+            GeneticUtils.reorderRandomly(generation.generation());
+            generation.recalculAllFitness();
+            generation.determineProbabilite();
             List<Individu> selection = generation.selection(NB_SELECTION);
             generation = new Generation(selection);
+            generation.recalculAllFitness();
+            
+            fitness = generation.getBestFitness();
             
             iterations++;
         }

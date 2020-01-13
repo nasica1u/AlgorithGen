@@ -22,11 +22,11 @@ public class GeneticUtils {
     }
     
     public static List<Individu[]> getCouples(List<Individu> individus) {
-        if (individus != null && individus.size() % 2 == 0) { // seulement si l on peut faire des couples sans reste
+        if (individus != null) {
             List<Individu[]> couples = new ArrayList(individus.size()/2);
             Individu[] couple = null;
-            for (int i = 1; i <= individus.size(); i++ ) {
-                if (i % 2 == 1) {
+            for (int i = 0; i < individus.size(); i++ ) {
+                if (i % 2 == 0) {
                     couple = new Individu[2];
                     couple[0] = individus.get(i);
                 }
@@ -35,12 +35,13 @@ public class GeneticUtils {
                     couples.add(couple);
                 }
             }
+            return couples;
         }
         return null;
     }
     
     public static List<Individu> getEnfants(List<Individu[]> parents) {
-        if (parents != null && parents.size() % 2 == 0) {
+        if (parents != null && !parents.isEmpty() && parents.size() % 2 == 0) {
             List<Individu> enfants = new ArrayList(parents.size() * 2);
             
             for (Individu[] parent : parents) {
@@ -52,15 +53,15 @@ public class GeneticUtils {
                 double a3 = loiNormale();
                 double a4 = loiNormale();
                 
-                Individu enfantN1 = new Individu(a1 * pere.getR() + (1 - a1 * mere.getR()),
-                                                    a2 * pere.getQ() + (1 - a2 * mere.getQ()),
-                                                    a3 * pere.getK() + (1 - a3 * mere.getK()),
-                                                    a4 * pere.getB0() + (1 - a4 * mere.getB0()));
+                Individu enfantN1 = new Individu(a1 * pere.getR() + ((1 - a1) * mere.getR()),
+                                                    a2 * pere.getQ() + ((1 - a2) * mere.getQ()),
+                                                    a3 * pere.getK() + ((1 - a3) * mere.getK()),
+                                                    a4 * pere.getB0() + ((1 - a4) * mere.getB0()));
                 
-                Individu enfantN2 = new Individu(a1 * mere.getR() + (1 - a1 * pere.getR()),
-                                                    a2 * mere.getQ() + (1 - a2 * pere.getQ()),
-                                                    a3 * mere.getK() + (1 - a3 * pere.getK()),
-                                                    a4 * mere.getB0() + (1 - a4 * pere.getB0()));
+                Individu enfantN2 = new Individu(a1 * mere.getR() + ((1 - a1) * pere.getR()),
+                                                    a2 * mere.getQ() + ((1 - a2) * pere.getQ()),
+                                                    a3 * mere.getK() + ((1 - a3) * pere.getK()),
+                                                    a4 * mere.getB0() + ((1 - a4) * pere.getB0()));
                 
                 enfants.add(enfantN1);
                 enfants.add(enfantN2);
@@ -84,5 +85,22 @@ public class GeneticUtils {
     
     public static double loiNormale() {
         return loiNormale(0.5, 0.2);
+    }
+    
+    public static void reorderRandomly(List<Individu> individus) {
+        int targetSize = individus.size();
+        int size = targetSize;
+        List<Individu> reordered = new ArrayList(size);
+        
+        while (reordered.size() < targetSize) {
+            int nextRandom = (int) (Math.random() * size);
+            reordered.add(individus.get(nextRandom));
+            
+            individus.remove(nextRandom);
+            size = individus.size();
+        }
+        
+        individus.clear();
+        individus.addAll(reordered);
     }
 }
