@@ -5,6 +5,7 @@
  */
 package algorithmegen;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,49 +28,50 @@ public class AlgorithmeGen {
         Generation generation = new Generation(N);
         
         int MAX_ITERATIONS = 1000;
-        int PAS_ENREGISTREMENT_PAST_FITNESS = 10;
-        double FITNESS_MIN = 0.2;
-        double FITNESS_STABLE = 0.05;
+        double FITNESS_MIN = 1;
         
         int NB_SELECTION_PARENT = 40;
         int NB_SELECTION = 100;
         
         int iterations = 0;
         double fitness = generation.getBestFitness();
-        double pastFitness = 0;
-        while (iterations < MAX_ITERATIONS && fitness > FITNESS_MIN && (fitness - pastFitness) > FITNESS_STABLE)
+        
+        double firstFitness = fitness;
+        double lastFitness = Integer.MAX_VALUE;
+        while (iterations < MAX_ITERATIONS && fitness > FITNESS_MIN)
         {
-            System.out.println("Generation actuelle : "+iterations);
-            System.out.println("Meilleur fitness actuel : "+fitness);
-            
-            // Selection des parents
+            // Croisement
             generation.determineProbabilite();
-            List<Individu> selectionParent = generation.selection(NB_SELECTION_PARENT);
+            List<Individu> enfants = GeneticUtils.getEnfants(GeneticUtils.getCouples(generation.selectionGeneration(NB_SELECTION_PARENT)));
             
-            // Recuperation enfants a partir des couples de parents
-            List<Individu> enfants = GeneticUtils.getEnfants(GeneticUtils.getCouples(selectionParent));
-            
-            // Mutation de la population precedente
+            // Mutation
             generation.mutation();
-            generation.recalculAllFitness(); // on recalcule les fitness apres les changements de mutation
-            generation.determineProbabilite(); // recalcule de proba
-            
-            generation.generation().addAll(enfants); // ajout de tous les enfants avec la population ayant subit la mutation
             generation.recalculAllFitness();
             generation.determineProbabilite();
             
-            // Selection de la nouvelle generation a la place de l ancienne
-            GeneticUtils.reorderRandomly(generation.generation());
+            // Selection
+            List<Individu> totalGen = new ArrayList();
+            totalGen.addAll(generation.generation());
+            totalGen.addAll(enfants);
+            GeneticUtils.reorderRandomly(totalGen);
+            generation.generation().clear();
+            generation.generation().addAll(totalGen);
             generation.recalculAllFitness();
             generation.determineProbabilite();
-            List<Individu> selection = generation.selection(NB_SELECTION);
-            generation = new Generation(selection);
-            generation.recalculAllFitness();
+            
+            List<Individu> newGen = new ArrayList();
+            newGen.addAll(generation.selectionGeneration(NB_SELECTION));
+            
+            generation = new Generation(newGen);
             
             fitness = generation.getBestFitness();
+            System.out.println("Meilleur fitness actuel : "+fitness);
+            lastFitness = fitness;
             
             iterations++;
         }
+        System.out.println("START : "+firstFitness);
+        System.out.println("END : "+lastFitness);
     }
     
 }

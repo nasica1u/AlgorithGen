@@ -35,13 +35,14 @@ public class GeneticUtils {
                     couples.add(couple);
                 }
             }
+            //System.out.println("couples : "+couples.size());
             return couples;
         }
         return null;
     }
     
     public static List<Individu> getEnfants(List<Individu[]> parents) {
-        if (parents != null && !parents.isEmpty() && parents.size() % 2 == 0) {
+        if (parents != null && !parents.isEmpty()) {
             List<Individu> enfants = new ArrayList(parents.size() * 2);
             
             for (Individu[] parent : parents) {
@@ -66,6 +67,7 @@ public class GeneticUtils {
                 enfants.add(enfantN1);
                 enfants.add(enfantN2);
             }
+            //System.out.println("enfants : "+enfants.size());
             return enfants;
         }
         return null;

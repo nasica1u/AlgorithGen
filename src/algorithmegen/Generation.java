@@ -7,6 +7,7 @@ package algorithmegen;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,8 +22,8 @@ public class Generation {
         for (int i = 0; i < nbIndividus; i++) {
             double r = 0.05 + (0.5 - 0.05) * Math.random();
             double q = 0.05 + (0.5 - 0.05) * Math.random();
-            int k = (int) (100 + ((2000 - 100) + 1) * Math.random());
-            int b0 = (int) (100 + ((2000 - 100) + 1) * Math.random());
+            int k = (int) (100 + ((2000 - 100)) * Math.random());
+            int b0 = (int) (100 + ((2000 - 100)) * Math.random());
             generation.add(new Individu(r, q, k, b0));
         }
     }
@@ -70,7 +71,22 @@ public class Generation {
         return sommeInv;
     }
     
-    public List<Individu> selection(int nbIndividus) {
+    public List<Individu> selectionGeneration(int nbIndividus) {
+        if (nbIndividus >= generation.size())
+            return generation;
+        List<Individu> selection = new ArrayList(nbIndividus);
+        List<Individu> tmp = new ArrayList();
+        tmp.addAll(generation);
+        Collections.sort(tmp, new Individu.ProbaComparator());
+        
+        for (int i = 0; i < nbIndividus; i++) {
+            selection.add(tmp.get(i));
+        }
+        
+        return selection;
+    }
+    
+    public List<Individu> selectionParents(int nbIndividus) {
         List<Individu> selection = new ArrayList(nbIndividus);
         List<double[]> plages = new ArrayList(size());
         
@@ -115,21 +131,29 @@ public class Generation {
             List<String> variables = new ArrayList(Arrays.asList(new String[] {"r", "k", "q", "b0"}));
             for (int i = 0; i < nbVarToMutate; i++) {
                 String varToMutate = variables.remove((int) (Math.random() * variables.size()));
+                double mu;
+                double sigma;
                 switch (varToMutate) {
                     case "r":
+                        mu = individu.getR();
+                        sigma = sigma(getAllR(toMutate));
                         while (true)
                         {
-                            double newR = GeneticUtils.loiNormale(individu.getR(), sigma(getAllR(toMutate)));
-                            if (newR >= 0.05 && newR <= 0.5) {
+                            //double newR = GeneticUtils.loiNormale(individu.getR(), sigma(getAllR(toMutate)));
+                            double newR = mu + Math.random() * sigma;
+                            if (newR >= 0 && newR <= 0.5) {
                                 individu.setR(newR);
                                 break;
                             }
                         }
                         break;
                     case "k":
+                        mu = individu.getK();
+                        sigma = sigma(getAllK(toMutate));
                         while (true)
                         {
-                            double newK = GeneticUtils.loiNormale(individu.getK(), sigma(getAllK(toMutate)));
+                            //double newK = GeneticUtils.loiNormale(individu.getK(), sigma(getAllK(toMutate)));
+                            double newK = mu + Math.random() * sigma;
                             if (newK >= 100 && newK <= 2000) {
                                 individu.setK(newK);
                                 break;
@@ -137,19 +161,25 @@ public class Generation {
                         }
                         break;
                     case "q":
+                        mu = individu.getQ();
+                        sigma = sigma(getAllQ(toMutate));
                         while (true)
                         {
-                            double newQ = GeneticUtils.loiNormale(individu.getQ(), sigma(getAllQ(toMutate)));
-                            if (newQ >= 0.05 && newQ <= 0.5) {
+                            //double newQ = GeneticUtils.loiNormale(individu.getQ(), sigma(getAllQ(toMutate)));
+                            double newQ = mu + Math.random() * sigma;
+                            if (newQ >= 0 && newQ <= 0.5) {
                                 individu.setQ(newQ);
                                 break;
                             }
                         }
                         break;
                     case "b0":
+                        mu = individu.getB0();
+                        sigma = sigma(getAllB0(toMutate));
                         while (true)
                         {
-                            double newB0 = GeneticUtils.loiNormale(individu.getB0(), sigma(getAllB0(toMutate)));
+                            //double newB0 = GeneticUtils.loiNormale(individu.getB0(), sigma(getAllB0(toMutate)));
+                            double newB0 = mu + Math.random() * sigma;
                             if (newB0 >= 100 && newB0 <= 2000) {
                                 individu.setB0(newB0);
                                 break;

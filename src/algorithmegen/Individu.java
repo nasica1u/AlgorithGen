@@ -5,6 +5,7 @@
  */
 package algorithmegen;
 
+import java.util.Comparator;
 import java.util.UUID;
 
 /**
@@ -29,9 +30,9 @@ public class Individu {
     
     public Individu(double r, double q, double k, double b0) {
         uuid = UUID.randomUUID();
-        this.r = r;
-        this.q = q;
-        this.k = k;
+        this.r = r <= 0.5 ? r : 0.5;
+        this.q = q <= 0.5 ? q : 0.5;
+        this.k = k <= 2000 ? k : 2000;
         this.b0 = b0 > k ? k : b0;
         
         captures = new double[E.length];
@@ -59,12 +60,13 @@ public class Individu {
             b0 = k;
         double biomasse = b0;
         for (int i = 0; i < E.length; i++) {
-            captures[i] = q * E[i] * biomasse;
+            
             biomasse = biomasse + r * (1 - biomasse/k) * biomasse - q * E[i] * biomasse;
             if(biomasse < 0)
                 biomasse = 0;
             if (biomasse > k)
                 biomasse = k;
+            captures[i] = q * E[i] * biomasse;
         }
     }
     
@@ -121,5 +123,14 @@ public class Individu {
     @Override
     public String toString() {
         return "Individu{" + "uuid=" + uuid + ", r=" + r + ", q=" + q + ", k=" + k + ", b0=" + b0 + '}';
+    }
+    
+    public static class ProbaComparator implements Comparator<Individu> {
+
+        @Override
+        public int compare(Individu p1, Individu p2) {
+            return Double.compare(p2.getProbabilite(), p1.getProbabilite());
+        }
+        
     }
 }
