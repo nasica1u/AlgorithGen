@@ -53,7 +53,7 @@ public class Generation {
     
     public void determineProbabilite() {
         for (Individu individu : generation) {
-            individu.setProbabilite((1/individu.getFitness()) / sommeInvFitness());
+            individu.setProbabilite((1 / individu.getFitness()) / sommeInvFitness());
         }
     }
     
@@ -71,12 +71,43 @@ public class Generation {
         return sommeInv;
     }
     
-    public List<Individu> selectionGeneration(int nbIndividus) {
-        if (nbIndividus >= generation.size())
-            return generation;
+    public List<Individu> selectionPrototype(int nbIndividus, List<Individu> individus) {
+        List<Individu> selection = new ArrayList(nbIndividus);
+        List<Double> probas = new ArrayList();
+        for (Individu individu : individus) {
+            probas.add(individu.getProbabilite());
+        }
+        double goalPercentage = 1 - nbIndividus / individus.size();
+        double mediane = percentile(probas, goalPercentage);
+        
+        for (Individu i : individus) {
+            if (i.getProbabilite() >= mediane && selection.size() <= nbIndividus){
+                selection.add(i);
+            }
+        }
+        
+        return selection;
+    }
+    
+    public static double percentile(List<Double> values, double percentile) { Collections.sort(values); int index = (int) Math.ceil((percentile / 100) * values.size()); return values.get(index - 1); }
+    
+    public List<Individu> selectionRandom(int nbIndividus, List<Individu> individus) {
         List<Individu> selection = new ArrayList(nbIndividus);
         List<Individu> tmp = new ArrayList();
-        tmp.addAll(generation);
+        tmp.addAll(individus);
+        
+        while (tmp.size() > 0) {
+            int randomPos = (int)(Math.random() * (tmp.size() - 1));
+            selection.add(tmp.remove(randomPos));
+        }
+        
+        return selection;
+    }
+    
+    public List<Individu> selectionGeneration(int nbIndividus, List<Individu> individus) {
+        List<Individu> selection = new ArrayList(nbIndividus);
+        List<Individu> tmp = new ArrayList();
+        tmp.addAll(individus);
         Collections.sort(tmp, new Individu.ProbaComparator());
         
         for (int i = 0; i < nbIndividus; i++) {
@@ -86,27 +117,27 @@ public class Generation {
         return selection;
     }
     
-    public List<Individu> selectionParents(int nbIndividus) {
+    public List<Individu> selectionParents(int nbIndividus, List<Individu> individus) {
         List<Individu> selection = new ArrayList(nbIndividus);
-        List<double[]> plages = new ArrayList(size());
+        List<double[]> plages = new ArrayList(individus.size());
         
         // premiere plage
-        plages.add(new double[]{0, generation.get(0).getProbabilite()});
-        for (int i = 0; i < generation.size() - 1; i++) {
+        plages.add(new double[]{0, individus.get(0).getProbabilite()});
+        for (int i = 0; i < individus.size() - 1; i++) {
             double first = plages.get(i)[1];
-            double second = first + generation.get(i+1).getProbabilite();
+            double second = first + individus.get(i+1).getProbabilite();
             //System.out.println(i+" => "+first+":"+second);
             plages.add(new double[]{first, second});
         }
         
-        for (int j = 0; j < generation.size(); j++) {
+        for (int j = 0; j < individus.size(); j++) {
             double proba = j / ((double)nbIndividus + 1); // proba qui doit se trouver dans notre plage
             int indicePlage = 0; // indice de la plage qui correspond a l indice d un individu de la generation
             for (double[] plage : plages) {
                 //if (selection.size() == nbIndividus)
                 //    break;
                 if (proba > plage[0] && proba <= plage[1]) {
-                    selection.add(generation.get(indicePlage));
+                    selection.add(individus.get(indicePlage));
                     break;
                 }
                 indicePlage++;
@@ -139,9 +170,8 @@ public class Generation {
                         sigma = sigma(getAllR(toMutate));
                         while (true)
                         {
-                            //double newR = GeneticUtils.loiNormale(individu.getR(), sigma(getAllR(toMutate)));
-                            double newR = mu + Math.random() * sigma;
-                            if (newR >= 0 && newR <= 0.5) {
+                            double newR = GeneticUtils._loi_normale(mu, sigma);
+                            if (newR >= 0.05 && newR <= 0.5) {
                                 individu.setR(newR);
                                 break;
                             }
@@ -152,8 +182,7 @@ public class Generation {
                         sigma = sigma(getAllK(toMutate));
                         while (true)
                         {
-                            //double newK = GeneticUtils.loiNormale(individu.getK(), sigma(getAllK(toMutate)));
-                            double newK = mu + Math.random() * sigma;
+                            double newK = GeneticUtils._loi_normale(mu, sigma);
                             if (newK >= 100 && newK <= 2000) {
                                 individu.setK(newK);
                                 break;
@@ -165,9 +194,8 @@ public class Generation {
                         sigma = sigma(getAllQ(toMutate));
                         while (true)
                         {
-                            //double newQ = GeneticUtils.loiNormale(individu.getQ(), sigma(getAllQ(toMutate)));
-                            double newQ = mu + Math.random() * sigma;
-                            if (newQ >= 0 && newQ <= 0.5) {
+                            double newQ = GeneticUtils._loi_normale(mu, sigma);
+                            if (newQ >= 0.05 && newQ <= 0.5) {
                                 individu.setQ(newQ);
                                 break;
                             }
@@ -178,8 +206,7 @@ public class Generation {
                         sigma = sigma(getAllB0(toMutate));
                         while (true)
                         {
-                            //double newB0 = GeneticUtils.loiNormale(individu.getB0(), sigma(getAllB0(toMutate)));
-                            double newB0 = mu + Math.random() * sigma;
+                            double newB0 = GeneticUtils._loi_normale(mu, sigma);
                             if (newB0 >= 100 && newB0 <= 2000) {
                                 individu.setB0(newB0);
                                 break;
@@ -191,6 +218,7 @@ public class Generation {
                 }
             }
             individu.initCaptures();
+            individu.initFitness();
         }
         generation.addAll(toMutate);
     }

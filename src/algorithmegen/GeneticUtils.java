@@ -49,10 +49,10 @@ public class GeneticUtils {
                 Individu pere = parent[0];
                 Individu mere = parent[1];
                 
-                double a1 = loiNormale();
-                double a2 = loiNormale();
-                double a3 = loiNormale();
-                double a4 = loiNormale();
+                double a1 = _loi_normale();
+                double a2 = _loi_normale();
+                double a3 = _loi_normale();
+                double a4 = _loi_normale();
                 
                 Individu enfantN1 = new Individu(a1 * pere.getR() + ((1 - a1) * mere.getR()),
                                                     a2 * pere.getQ() + ((1 - a2) * mere.getQ()),
@@ -83,6 +83,26 @@ public class GeneticUtils {
                 return mu + alea1 * sigma * Math.sqrt((-2 * Math.log(w)) / w);
             }
         }
+    }
+    
+    // LOI UNIFORME
+    public static double loi_uniforme() {
+       double i = Math.random();
+       return i;
+    }
+    // LOI NORMALE
+    public static double _loi_normale(double m, double s){
+         double x1,x2,y;
+         x1 = loi_uniforme();
+         x2 = loi_uniforme();
+
+         // methode de Boc-Muller
+         y = Math.pow(-2*Math.log(x1),0.5)*Math.cos(2.* 3.*x2);
+         return m + s*y;
+    }
+    
+    public static double _loi_normale(){
+        return _loi_normale(0.5, 0.2);
     }
     
     public static double loiNormale() {

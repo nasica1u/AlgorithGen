@@ -133,4 +133,13 @@ public class Individu {
         }
         
     }
+    
+    public static class FitnessComparator implements Comparator<Individu> {
+
+        @Override
+        public int compare(Individu p1, Individu p2) {
+            return Double.compare(p1.getFitness(), p2.getFitness());
+        }
+        
+    }
 }

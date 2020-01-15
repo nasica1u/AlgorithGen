@@ -41,8 +41,9 @@ public class AlgorithmeGen {
         while (iterations < MAX_ITERATIONS && fitness > FITNESS_MIN)
         {
             // Croisement
+            generation.recalculAllFitness();
             generation.determineProbabilite();
-            List<Individu> enfants = GeneticUtils.getEnfants(GeneticUtils.getCouples(generation.selectionGeneration(NB_SELECTION_PARENT)));
+            List<Individu> enfants = GeneticUtils.getEnfants(GeneticUtils.getCouples(generation.selectionGeneration(NB_SELECTION_PARENT, generation.generation())));
             
             // Mutation
             generation.mutation();
@@ -60,7 +61,7 @@ public class AlgorithmeGen {
             generation.determineProbabilite();
             
             List<Individu> newGen = new ArrayList();
-            newGen.addAll(generation.selectionGeneration(NB_SELECTION));
+            newGen.addAll(generation.selectionGeneration(NB_SELECTION, generation.generation()));
             
             generation = new Generation(newGen);
             
